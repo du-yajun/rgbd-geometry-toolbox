@@ -1,0 +1,10 @@
+# 本项目在 macOS (Apple Silicon, Python 3.11) 上验证过的版本
+# 安装：pip install -r requirements.txt
+numpy==2.4.6
+matplotlib==3.11.2
+open3d==0.20.0
+pytest==9.1.1
+
+# macOS 额外说明：Open3D 的 macOS wheel 依赖系统库 libusb，
+# 缺少它时 import open3d 会报 "Library not loaded: libusb-1.0.0.dylib"。
+# 解决：brew install libusb

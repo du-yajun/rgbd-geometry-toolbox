@@ -1,0 +1,17 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# 编辑器
+.vscode/
+.idea/
+
+# 数据：体积大，不进仓库（阶段 2 会记录数据的获取方式）
+data/
