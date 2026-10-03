@@ -64,3 +64,39 @@
 
 任务 2：手算一个三维点的投影，并自己实现 `project_points(points_cam, K)`
 
+
+---
+
+## 2026-10-03 · 任务 1 收尾与仓库初始化
+
+### 脚本修改（导师代做，用户已同意）
+
+`work/01_pixel_and_index.py` 在原代码基础上补充：
+
+- 每个代码块的作用说明（广播、下标、切片、存图、伪彩色图）
+- 四个问题的标准答案（写在文件末尾的注释块里）
+- `fake_rgb` 从 `np.random.rand` 改为 `np.stack([depth, depth, depth], axis=-1)`，
+  这样三个通道有确定含义，能说明「彩色图 = 三张同尺寸二维图叠起来」
+- 存图路径改用 `pathlib` 从脚本位置反推，不再写死绝对路径
+- 补中文字体设置（否则 matplotlib 默认字体渲染中文会出现方块）
+  —— 第一次运行时确实是方块，加了 `PingFang SC` 回退后才正常，已用看图工具确认
+
+### 标准答案要点
+
+- Q1：`depth[2, 3] = 23` 对应 `(u, v) = (3, 2)`；索引顺序是 `[row, col]`
+- Q2：图像上方（v 小）对应相机坐标系 -Y；约定为 X 右、Y 下、Z 向前
+- Q3：`(480, 640, 3)` 的图 `u_max = 639`、`v_max = 479`（先写 H,W 再分配 u,v）
+- Q4：`u >= 480` 抛 IndexError；`u < 480` 静默算错；`u == v` 的像素恰好正确，
+  所以抽检必须挑 `u != v` 的像素
+
+### 仓库
+
+- 已 `git init -b main` 并完成首次提交 `9a60e56`
+- 提交内容：`.gitignore`、`README.md`、`requirements.txt`、`notes/`、`outputs/`、`work/`
+- 生成物 `outputs/01_pixel_grid.png` 一并入库，方便 GitHub 上直接看到效果图
+- 尚未做：创建 GitHub 远程仓库、`git remote add`、`git push`
+
+### 待确认
+
+- Open3D 的离屏渲染（不弹窗截图）尚未测试，阶段 3 需要时再验
+- 真实 RGB-D 数据尚未下载，阶段 2 处理
