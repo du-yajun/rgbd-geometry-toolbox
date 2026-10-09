@@ -3,6 +3,7 @@
 
 # Python
 __pycache__/
+.ruff_cache/
 *.py[cod]
 *.egg-info/
 .venv/
@@ -15,3 +16,7 @@ venv/
 
 # 数据：体积大，不进仓库（阶段 2 会记录数据的获取方式）
 data/
+
+# AI 生成的参考版本：留在本机对照学习，但不提交到 GitHub
+# 目的是让仓库里只有我自己写的代码
+ai_reference/

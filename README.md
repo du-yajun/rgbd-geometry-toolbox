@@ -28,12 +28,16 @@ macOS / Apple M4 / Python 3.11.16 / numpy 2.4.6 / matplotlib 3.11.2 / Open3D 0.2
 ```
 .
 ├── README.md
-├── requirements.txt
+├── pyproject.toml             # ruff 检查与格式化的配置
+├── requirements.txt           # 运行依赖
+├── requirements-dev.txt       # 开发工具（ruff）
 ├── notes/
 │   └── learning-log.md        # 学习日志：每步做了什么、验证了什么、还剩什么疑问
 ├── outputs/                   # 效果图等产出
 └── work/                      # 练习脚本
-    └── 01_pixel_and_index.py  # 任务 1：像素坐标 (u,v) 与数组下标 [row,col]
+    ├── 01_pixel_and_index.py  # 任务 1：像素坐标 (u,v) 与数组下标 [row,col]
+    ├── 02_project_points.py   # 任务 2：三维点投影为像素
+    └── 03_backproject.py      # 任务 3：像素加深度反投影为三维点
 ```
 
 ## 运行
@@ -41,7 +45,26 @@ macOS / Apple M4 / Python 3.11.16 / numpy 2.4.6 / matplotlib 3.11.2 / Open3D 0.2
 ```bash
 conda activate rgbd
 python work/01_pixel_and_index.py
+python work/02_project_points.py
+python work/03_backproject.py
 ```
+
+## 代码规范
+
+代码检查与格式化统一交给 ruff，配置在 pyproject.toml：
+
+```bash
+conda activate rgbd
+ruff check .            # 检查代码问题
+ruff format --check .   # 只检查格式，不改文件
+ruff format .           # 按规范重排格式
+```
+
+VS Code 已安装 ruff 扩展，会读取同一份 pyproject.toml，编辑时即时提示。
+
+注释约定：docstring 采用 NumPy 风格（Parameters / Returns / Notes 三节），
+行内注释只写「为什么这么写」，不写「这段代码在做什么」。
+pyproject.toml 中有意停用了三条规则（D400、N803、N806），理由写在该文件的注释里。
 
 ## 进度
 
@@ -58,5 +81,5 @@ python work/01_pixel_and_index.py
 - 图像数组的第 0 轴是竖直方向（v），第 1 轴是水平方向（u），
   所以「像素坐标 (u, v)」翻译成数组下标要写成 `[v, u]`。
 - 相机坐标系（OpenCV/Open3D 约定）：X 右、Y 下、Z 沿光轴向前。
-- 程序不报错不等于结果正确。行列互换、RGB/BGR、深度单位、内参分辨率不匹配
+- 程序不报错不等于结果正确，行列互换、RGB/BGR、深度单位、内参分辨率不匹配
   都属于「能跑完但算错」，必须靠主动设计的检查发现。

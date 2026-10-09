@@ -1,0 +1,36 @@
+# 工具配置；依赖用 requirements.txt / requirements-dev.txt 管理，这里只放代码检查工具的设置。
+
+[tool.ruff]
+line-length = 88
+target-version = "py311"
+# ai_reference 是本地对照用的 AI 生成版本，不属于本项目代码。
+exclude = [".git", ".ruff_cache", "ai_reference", "outputs"]
+
+[tool.ruff.lint]
+# 规则集说明见 https://docs.astral.sh/ruff/rules/
+select = [
+    "E",   # pycodestyle 错误
+    "W",   # pycodestyle 警告
+    "F",   # pyflakes：未使用的变量、导入等真实缺陷
+    "I",   # isort：import 分组与排序
+    "UP",  # pyupgrade：提示被新语法取代的旧写法
+    "B",   # flake8-bugbear：容易踩坑的写法
+    "SIM", # flake8-simplify：可以简化的写法
+    "D",   # pydocstyle：docstring 规范
+    "N",   # pep8-naming：命名规范
+]
+ignore = [
+    # ruff 只把 ASCII 的 . ? ! 视作句末标点，不识别中文句号「。」。
+    # 本项目的 docstring 与注释使用中文，按中文写作规范以「。」结尾，
+    # 因此停用这一条。若将来 docstring 改写成英文，删除本行即可恢复默认检查。
+    "D400", # First line should end with a period
+    # 相机几何沿用公式中的记法，K、X、Y、Z 等故意保持大写，与变量小写规范冲突，
+    # 属于有意为之，不是笔误。
+    "N803", # Argument name should be lowercase
+    "N806", # Variable in function should be lowercase
+]
+
+[tool.ruff.lint.pydocstyle]
+# numpy 约定会自动放宽 D413（section 后需空行）与 D415（首行结尾标点）等规则，
+# 因此上面只需单独忽略 D400。
+convention = "numpy"
