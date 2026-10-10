@@ -39,7 +39,8 @@ macOS / Apple M4 / Python 3.11.16 / numpy 2.4.6 / matplotlib 3.11.2 / Open3D 0.2
     ├── 01_pixel_and_index.py  # 任务 1：像素坐标 (u,v) 与数组下标 [row,col]
     ├── 02_project_points.py   # 任务 2：三维点投影为像素
     ├── 03_backproject.py      # 任务 3：像素加深度反投影为三维点
-    └── 04_inspect_rgbd.py     # 任务 4：真实 RGB-D 数据体检
+    ├── 04_inspect_rgbd.py     # 任务 4：真实 RGB-D 数据体检
+    └── 05_depth_to_pointcloud.py  # 任务 5：整帧反投影生成点云并对照 Open3D
 ```
 
 ## 运行
@@ -50,7 +51,10 @@ python work/01_pixel_and_index.py
 python work/02_project_points.py
 python work/03_backproject.py
 python work/04_inspect_rgbd.py     # 需要先按 notes/dataset.md 下载数据
+python work/05_depth_to_pointcloud.py
 ```
+
+点在云文件体积较大，已在 .gitignore 中排除 outputs/*.ply，需要时用上面的脚本重新生成。
 
 ## 代码规范
 
@@ -74,9 +78,15 @@ pyproject.toml 中有意停用了三条规则（D400、N803、N806），理由�
 - [x] 阶段 0：环境搭建与检查
 - [x] 阶段 1：相机模型（任务 1 像素坐标与数组下标、任务 2 投影、任务 3 反投影与往返一致性）
 - [x] 阶段 2：读取并检查真实 RGB-D 数据，见 notes/dataset.md
-- [ ] 阶段 3：自己实现深度反投影生成点云
+- [x] 阶段 3：自己实现深度反投影生成点云，与 Open3D 对照误差 1.2e-07 m
 - [ ] 阶段 4：坐标变换与一致性测试
 - [ ] 阶段 5：点云过滤与项目整理
+
+## 效果
+
+第 0 帧反投影得到的点云（267129 个点，颜色取自彩色图）：
+
+![点云预览](outputs/05_pointcloud_preview.png)
 
 ## 目前的核心结论
 
