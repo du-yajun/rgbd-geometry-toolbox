@@ -56,6 +56,7 @@ python work/04_inspect_rgbd.py     # 需要先按 notes/dataset.md 下载数据
 python work/05_depth_to_pointcloud.py
 python work/06_rigid_transform.py
 python work/07_transform_pointcloud.py
+python work/08_consistency_check.py
 ```
 
 查看点云（需要图形窗口，在本地终端里运行）：
@@ -91,7 +92,9 @@ pyproject.toml 中有意停用了三条规则（D400、N803、N806），理由�
 - [x] 阶段 1：相机模型（任务 1 像素坐标与数组下标、任务 2 投影、任务 3 反投影与往返一致性）
 - [x] 阶段 2：读取并检查真实 RGB-D 数据，见 notes/dataset.md
 - [x] 阶段 3：自己实现深度反投影生成点云，与 Open3D 对照误差 1.2e-07 m
-- [ ] 阶段 4：坐标变换与一致性测试
+- [x] 阶段 4：坐标变换与一致性测试
+  （任务 6 刚体变换在合成点上验证、任务 7 在真实点云上验证、
+  任务 8 投影与反投影的一致性检查）
 - [ ] 阶段 5：点云过滤与项目整理
 
 ## 效果
