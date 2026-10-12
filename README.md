@@ -35,6 +35,8 @@ macOS / Apple M4 / Python 3.11.16 / numpy 2.4.6 / matplotlib 3.11.2 / Open3D 0.2
 │   ├── learning-log.md        # 学习日志：每步做了什么、验证了什么、还剩什么疑问
 │   └── dataset.md             # 数据集说明：来源、内参、格式、已知限制
 ├── outputs/                   # 效果图等产出
+├── tools/
+│   └── view_pointcloud.py     # 点云查看器：在 Open3D 窗口里查看 PLY
 └── work/                      # 练习脚本
     ├── 01_pixel_and_index.py  # 任务 1：像素坐标 (u,v) 与数组下标 [row,col]
     ├── 02_project_points.py   # 任务 2：三维点投影为像素
@@ -52,7 +54,17 @@ python work/02_project_points.py
 python work/03_backproject.py
 python work/04_inspect_rgbd.py     # 需要先按 notes/dataset.md 下载数据
 python work/05_depth_to_pointcloud.py
+python work/06_rigid_transform.py
+python work/07_transform_pointcloud.py
 ```
+
+查看点云（需要图形窗口，在本地终端里运行）：
+
+```bash
+python tools/view_pointcloud.py outputs/05_pointcloud_frame0.ply
+python tools/view_pointcloud.py outputs/*.ply --axes
+```
+
 
 点在云文件体积较大，已在 .gitignore 中排除 outputs/*.ply，需要时用上面的脚本重新生成。
 
