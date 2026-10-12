@@ -42,7 +42,11 @@ macOS / Apple M4 / Python 3.11.16 / numpy 2.4.6 / matplotlib 3.11.2 / Open3D 0.2
     ├── 02_project_points.py   # 任务 2：三维点投影为像素
     ├── 03_backproject.py      # 任务 3：像素加深度反投影为三维点
     ├── 04_inspect_rgbd.py     # 任务 4：真实 RGB-D 数据体检
-    └── 05_depth_to_pointcloud.py  # 任务 5：整帧反投影生成点云并对照 Open3D
+    ├── 05_depth_to_pointcloud.py  # 任务 5：整帧反投影生成点云并对照 Open3D
+    ├── 06_rigid_transform.py      # 任务 6：刚体变换与已知答案测试
+    ├── 07_transform_pointcloud.py # 任务 7：真实点云上的变换验证
+    ├── 08_consistency_check.py    # 任务 8：投影与反投影一致性检查
+    └── 09_stitch_frames.py        # 拓展：按给定位姿拼接 5 帧
 ```
 
 ## 运行
@@ -57,6 +61,7 @@ python work/05_depth_to_pointcloud.py
 python work/06_rigid_transform.py
 python work/07_transform_pointcloud.py
 python work/08_consistency_check.py
+python work/09_stitch_frames.py
 ```
 
 查看点云（需要图形窗口，在本地终端里运行）：
@@ -96,6 +101,7 @@ pyproject.toml 中有意停用了三条规则（D400、N803、N806），理由�
   （任务 6 刚体变换在合成点上验证、任务 7 在真实点云上验证、
   任务 8 投影与反投影的一致性检查）
 - [ ] 阶段 5：点云过滤与项目整理
+- [x] 拓展（超出原定边界）：按给定相机位姿把 5 帧拼到同一坐标系
 
 ## 效果
 
@@ -115,6 +121,12 @@ pyproject.toml 中有意停用了三条规则（D400、N803、N806），理由�
 视野几乎没有变化，所以「多视角互补遮挡」在这里的作用有限。
 两者的包围盒尺寸几乎相同（2.41x1.60x1.75 对 2.42x1.54x1.69），
 也印证了覆盖范围一致，差别主要在去噪而非视角互补。
+
+按 trajectory.log 的位姿把 5 帧拼到同一坐标系。点数从 26.7 万增到 134 万，
+但包围盒只从 1.512x1.562x2.544 m 变成 1.531x1.565x2.641 m——
+相机五帧只移动 97.9 mm，所以拼接主要让点变密，几乎没有扩大覆盖范围。
+
+![单帧与 5 帧拼接](outputs/09_stitch_compare.png)
 
 ![单帧 vs 多帧融合](outputs/05_single_vs_fused.png)
 
