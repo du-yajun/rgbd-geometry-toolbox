@@ -53,8 +53,8 @@ def pixel_grid(height, width):
     -----
     要求 u[i, j] 等于第 i 行第 j 列像素的 u，v[i, j] 等于该像素的 v。
     """
-    # TODO 1: 用 np.meshgrid 生成。
-    #   注意 np.meshgrid 的每个参数对应哪一维，先用小的尺寸验证再继续。
+    # meshgrid 默认模式（indexing="xy"）下，第二个参数决定行数、第一个决定列数，
+    # 因此传 (col, row) 才能得到 u[i, j] = j、v[i, j] = i
     row = np.arange(height).reshape(height, 1)
     col = np.arange(width).reshape(1, width)
     u, v = np.meshgrid(col, row)
@@ -125,11 +125,10 @@ def points_to_colors(color, valid):
         取值范围 0 到 1。Open3D 的点云颜色使用这个范围，
         直接传入 0 到 255 的整数会被当作超范围值，颜色失真。
     """
-    # TODO 3: 把 (H, W, 3) 拉平成 (H*W, 3)，再用拉平后的 valid 取行。
-    #   拉平顺序必须与 depth_to_points 中一致，否则颜色与点错位。
+    # 直接用二维掩码索引 (H, W, 3) 的彩色图，
+    # 顺序自动与 depth_to_points 的拉平顺序一致，不必显式 reshape
     colors = color[valid].astype(np.float64) / 255
     return colors
-    # raise NotImplementedError("points_to_colors 还没实现")
 
 
 def save_pointcloud(points, colors, path):

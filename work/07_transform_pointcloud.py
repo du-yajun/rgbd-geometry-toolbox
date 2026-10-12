@@ -111,14 +111,14 @@ def pairwise_distances(points, pairs):
     distances : ndarray, shape (M,)
         每对点的距离
     """
-    # TODO 1: 用 fancy indexing 取出两端的点，再算范数。
-    #   提示：points[pairs[:, 0]] 得到 (M,3)，points[pairs[:, 1]] 同理。
-    #   求每行向量的长度用 np.linalg.norm(..., axis=1)。
-    raise NotImplementedError("pairwise_distances 还没实现")
+    first = points[pairs[:, 0]]
+    second = points[pairs[:, 1]]
+    # axis=1 表示对每一行求长度；不加它会把整个数组当成一个长向量，返回单个标量
+    return np.linalg.norm(first - second, axis=1)
 
 
 def main():
-    """在真实点云上验证变换的三条性质"""
+    """在真实点云上验证变换的刚体性、质心一致性、可逆性与实现一致性"""
     color, depth = load_frame(DATA_DIR, FRAME_INDEX)
     points, valid = depth_to_points(depth, INTRINSIC, DEPTH_SCALE)
     colors = points_to_colors(color, valid)
@@ -128,39 +128,55 @@ def main():
     T = make_transform(rotation_z(np.deg2rad(30)), np.array([1.0, 2.0, 3.0]))
     moved = transform_points(points, T)
 
-    # ---- 检查 1：变换是刚体的，点间距离必须不变 ----
-    # 随机抽 500 对点，比较变换前后的距离
+    # 随机抽 500 对点，用于检查 1 的距离比较
     rng = np.random.default_rng(0)
     idx = rng.choice(len(points), 500, replace=False)
     pairs = np.column_stack([idx, idx[::-1]])
 
-    # 下面 TODO 2 到 6 会用到 colors、moved、pairs，
-    # 在补完之前 ruff 会报 F841 未使用变量，属预期。
+    # ---- 检查 1：刚体性 ----
+    # 距离只由相对位置决定，平移项在相减时抵消，所以点间距离必须完全不变
+    distance_before = pairwise_distances(points, pairs)
+    distance_after = pairwise_distances(moved, pairs)
+    gap_rigid = np.abs(distance_before - distance_after).max()
+    assert gap_rigid < 1e-9, f"点间距离改变了，变换不是刚体: {gap_rigid:.3e}"
+    print(f"检查1 通过：500 对点距离最大变化 {gap_rigid:.3e}")
 
-    # TODO 2: 用 pairwise_distances 算变换前后的距离，
-    #   断言最大差异小于 1e-9，并打印实际值。
+    # ---- 检查 2：质心一致性 ----
+    # 求均值和施加仿射变换都是线性运算，可以交换顺序，
+    # 因此「先求质心再变换」应等于「先变换再求质心」。
+    # transform_points 的契约是 (N, 3)，单个质心要 reshape 成 (1, 3)
+    centroid = points.mean(axis=0)
+    centroid_moved = transform_points(centroid.reshape(1, 3), T)[0]
+    gap_centroid = np.abs(centroid_moved - moved.mean(axis=0)).max()
+    assert gap_centroid < 1e-9, f"质心变换不一致: {gap_centroid:.3e}"
+    print(f"检查2 通过：质心偏差 {gap_centroid:.3e}")
 
-    # ---- 检查 2：质心也应按同一个 T 变换 ----
-    # TODO 3: 计算 points 的质心 centroid（沿第 0 轴平均），
-    #   验证 transform_points(centroid reshaped to (1,3), T) 等于 moved 的质心。
-    #   想想为什么这个性质成立（提示：矩阵乘法对加法是线性的）。
+    # ---- 检查 3：可逆性 ----
+    # 施加 T 再施加 T 的逆，应回到原处
+    restored = transform_points(moved, invert_transform(T))
+    gap_inverse = np.abs(points - restored).max()
+    assert gap_inverse < 1e-9, f"逆变换未能还原: {gap_inverse:.3e}"
+    print(f"检查3 通过：逆变换最大误差 {gap_inverse:.3e}")
 
-    # ---- 检查 3：逆变换能把点云还原 ----
-    # TODO 4: 用 invert_transform 得到 T_inv，
-    #   对 moved 施加 T_inv，断言与原始 points 的最大差异小于 1e-9。
+    # ---- 检查 4：交叉实现比对 ----
+    # 两边吃同一个输入、用同一个 T，所以比较的是两份输出：
+    # 自实现的 moved 与 Open3D 的 ref。
+    # 这一条能抓住行/列向量约定不一致这类「两边各自自洽」的错误
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(points)
+    pcd.transform(T)
+    ref = np.asarray(pcd.points)
+    gap_open3d = np.abs(ref - moved).max()
+    assert np.allclose(moved, ref), f"与 Open3D 不一致: {gap_open3d:.3e}"
+    print(f"检查4 通过：与 Open3D 最大差异 {gap_open3d:.3e}")
 
-    # ---- 检查 4：与 Open3D 的结果对照 ----
-    # TODO 5: 用 o3d 对同一份点云施加同一个 T，比较逐点差异。
-    #   注意 o3d 的 Vector3dVector 接受 (N,3) 的 float64 数组。
-
-    # ---- 输出：保存变换后的点云，便于在窗口里查看 ----
-    # TODO 6: 把移动后的点云（带原颜色）写到
-    #   OUTPUT_DIR / "07_pointcloud_transformed.ply"
-    #   可以直接用 open3d 的写法：
-    #     pcd = o3d.geometry.PointCloud()
-    #     pcd.points = o3d.utility.Vector3dVector(moved)
-    #     pcd.colors = o3d.utility.Vector3dVector(colors)
-    #     o3d.io.write_point_cloud(str(path), pcd)
+    # ---- 保存变换后的点云，颜色沿用原始颜色 ----
+    out_pcd = o3d.geometry.PointCloud()
+    out_pcd.points = o3d.utility.Vector3dVector(moved)
+    out_pcd.colors = o3d.utility.Vector3dVector(colors)
+    out_path = OUTPUT_DIR / "07_pointcloud_transformed.ply"
+    ok = o3d.io.write_point_cloud(str(out_path), out_pcd)
+    print(f"保存 {out_path.name}: {ok}，点数 {len(moved)}")
 
 
 if __name__ == "__main__":
